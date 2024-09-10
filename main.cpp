@@ -197,7 +197,7 @@ void construirVisualizacao(LDEs &lGabarito, bool &acertou) {
     Nos *aux = lGabarito.comeco;
     while (aux != NULL) {
         if (aux->condicao == verde) {
-            cout << "\033[1;32m" << aux->info << "\033[0m";  // Verde 
+            cout << "\033[1;32m" << aux->info << "\033[0m";  // Verde
         } else if (aux->condicao == amarelo) {
             cout << "voce acertou a amarela letra, mas no lugar errado" << endl;
             cout << "\033[1;33m" << aux->info << "\033[0m" << endl; // Amarelo para letras erradas
@@ -226,8 +226,10 @@ int contarLetrasLDE(LDE lista) {
     return nLinhas;
 }
 
-void jogar(LDE lista, LDEs &lGabarito) {
+void jogar(LDE lista, LDEs &lGabarito, int subOpcao) {
     int id = rand() % contarLetrasLDE(lista) + 1;    // Pega id aleatorio da lista
+    int tentativas = 0;
+    bool perdeu = false;
     char letrasAcertadas;
     bool acertou = false;
     string tentativaDePalavra;
@@ -248,19 +250,44 @@ void jogar(LDE lista, LDEs &lGabarito) {
             cin >> tentativaDePalavra;
         }
         verificaJogo(lGabarito, tentativaDePalavra, acertou);
-        
-        if (acertou) {
+        tentativas++;
+        switch(subOpcao) {
+        case 1:
+            if (tentativas == 6) {
+                perdeu = true;
+            }
+            break;
+        case 2:
+            if (tentativas == 8) {
+                perdeu = true;
+            }
+            break;
+        case 3:
+            if (tentativas == 10) {
+                perdeu = true;
+            }
+            break;
+        case 4:
+            if (tentativas == 12) {
+                perdeu = true;
+            }
+            break;
+        }
+
+        if (acertou == true) {
+            system("cls");
             cout << "Parabéns, você venceu!" << endl;
             system("pause");
             limpaLDEs(lGabarito);  // Limpa a lista após acerto total
             return;
+        } else if (acertou == false && perdeu == true){
+            system("cls");
+            cout << "Você perdeu, boa sorte na próxima!" << endl;
+            system("pause");
+            limpaLDEs(lGabarito);  // Limpa a lista após perder total
+            return;
         }
     }
-
-    system("cls");
-    cout << "Suas tentativas expiraram. Derrota!" << endl;
-    system("pause");
-    limpaLDEs(lGabarito);  // Limpa a lista após o término do jogo
 }
 
 void mostrarMenu() {
@@ -301,7 +328,7 @@ void mostrarMenu() {
                 cin >> subOpcao;
                 switch (subOpcao) {
                     case 1:
-                        jogar(lista, lGabarito);
+                        jogar(lista, lGabarito, subOpcao);
                         break;
                     case 2:
                         // Implementar lógica para diferentes números de tentativas
