@@ -198,13 +198,43 @@ void construirVisualizacao(LDEs &lGabarito, bool &acertou) {
     while (aux != NULL) {
         if (aux->condicao == verde) {
             cout << "\033[1;32m" << aux->info << "\033[0m";  // Verde
-        } else if (aux->condicao == amarelo) {
-            cout << "voce acertou a amarela letra, mas no lugar errado" << endl;
-            cout << "\033[1;33m" << aux->info << "\033[0m" << endl; // Amarelo para letras erradas
         } else {
             cout << '_';
         }
         aux = aux->prox;
+    }
+    cout << endl;
+}
+
+void mostrarChute(LDEs &lGabarito, LDEs &lChute) {
+    Nos *auxGabarito = lGabarito.comeco;
+    Nos *auxChute = lChute.comeco;
+
+    while (auxChute != NULL && auxGabarito != NULL) {
+        if (auxChute->info == auxGabarito->info) {
+            // Letra correta e na posição certa (verde)
+            cout << "\033[1;32m" << auxChute->info << "\033[0m";  // Verde
+        } else {
+            // Verifica se a letra existe em outra posição na palavra (amarelo)
+            Nos *auxTemp = lGabarito.comeco;
+            bool letraExiste = false;
+            while (auxTemp != NULL) {
+                if (auxTemp->info == auxChute->info) {
+                    letraExiste = true;
+                    break;
+                }
+                auxTemp = auxTemp->prox;
+            }
+            if (letraExiste) {
+                // Letra existe na palavra, mas está na posição errada (amarelo)
+                cout << "\033[1;33m" << auxChute->info << "\033[0m";  // Amarelo
+            } else {
+                // Letra não existe na palavra (cinza)
+                cout << "\033[1;30m" << auxChute->info << "\033[0m";  // Cinza
+            }
+        }
+        auxChute = auxChute->prox;
+        auxGabarito = auxGabarito->prox;
     }
     cout << endl;
 }
@@ -230,48 +260,69 @@ void jogar(LDE lista, LDEs &lGabarito, int subOpcao) {
     int id = rand() % contarLetrasLDE(lista) + 1;    // Pega id aleatorio da lista
     int tentativas = 0;
     bool perdeu = false;
-    char letrasAcertadas;
     bool acertou = false;
     string tentativaDePalavra;
     No *temp = pesquisarLDE(lista, id);
     string palavra = temp->info;                   // Recebe palavra de acordo com id
     criaListaGab(lGabarito, temp);                  // Cria LDE gabarito com 5 posições com um CHAR em cada
 
-    while (!acertou) {
+    LDEs lChute;  // Lista para armazenar a tentativa do jogador
+    limpaLDEs(lChute);  // Inicializa a lista de chute
+
+    while (acertou == false) {
         // Mostra a palavra com as letras acertadas
         cout << "Adivinhe a palavra: ";
         construirVisualizacao(lGabarito, acertou);
+
+        // Recebe a tentativa do jogador
         cout << "Insira uma letra ou tente adivinhar a palavra completa: ";
         cin >> tentativaDePalavra;
-        while (tentativaDePalavra.length() != 5) {    // Verifica se a palavra contém cinco letras.
+
+        // Verifica se a palavra contém cinco letras
+        while (tentativaDePalavra.length() != 5) {
             system("cls");
             cout << "Erro. A palavra deve conter cinco letras!" << endl;
             construirVisualizacao(lGabarito, acertou);
+            cout << "Insira a palavra novamente: ";
             cin >> tentativaDePalavra;
         }
+
+        // Adiciona a tentativa na lista lChute
+        for (int i = 0; i < 5; i++) {
+            inserirFinalLDE(lChute, tentativaDePalavra[i], i);
+        }
+
+        // Verifica a tentativa do jogador
         verificaJogo(lGabarito, tentativaDePalavra, acertou);
+
+        // Mostra o chute do jogador
+        cout << "Seu chute: ";
+        mostrarChute(lGabarito, lChute);
+        limpaLDEs(lChute);
+
+        // Atualiza o número de tentativas e verifica se o jogador perdeu
         tentativas++;
         switch(subOpcao) {
-        case 1:
-            if (tentativas == 6) {
-                perdeu = true;
-            }
-            break;
-        case 2:
-            if (tentativas == 8) {
-                perdeu = true;
-            }
-            break;
-        case 3:
-            if (tentativas == 10) {
-                perdeu = true;
-            }
-            break;
-        case 4:
-            if (tentativas == 12) {
-                perdeu = true;
-            }
-            break;
+            case 1:
+                if (tentativas == 6) {
+                    perdeu = true;
+                }
+                break;
+            case 2:
+                if (tentativas == 8) {
+                    perdeu = true;
+                }
+                break;
+            case 3:
+                if (tentativas == 10) {
+                    perdeu = true;
+                }
+                break;
+            case 4:
+                if (tentativas == 12) {
+                    perdeu = true;
+                }
+                break;
         }
 
         if (acertou == true) {
@@ -279,12 +330,14 @@ void jogar(LDE lista, LDEs &lGabarito, int subOpcao) {
             cout << "Parabéns, você venceu!" << endl;
             system("pause");
             limpaLDEs(lGabarito);  // Limpa a lista após acerto total
+            limpaLDEs(lChute);  // Limpa a lista de chute
             return;
-        } else if (acertou == false && perdeu == true){
+        } else if (acertou == false && perdeu == true) {
             system("cls");
             cout << "Você perdeu, boa sorte na próxima!" << endl;
             system("pause");
             limpaLDEs(lGabarito);  // Limpa a lista após perder total
+            limpaLDEs(lChute);  // Limpa a lista de chute
             return;
         }
     }
