@@ -153,7 +153,7 @@ void pesquisarGabarito(LDEs &lGabarito, char letra, int letraNum, bool &acertou)
         }
         if (aux->condicao == verde) {
             win++;
-            if (win == 5) acertou = true;
+            if (win == 4) acertou = true;
         }
         aux = aux->prox;
     }
