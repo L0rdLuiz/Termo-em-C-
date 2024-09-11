@@ -9,6 +9,7 @@ using namespace std;
 
 enum cor { preto, amarelo, verde };
 
+
 struct Nos {
     int id;
     char info;
@@ -140,28 +141,44 @@ No *pesquisarLDE(LDE lista, int linha) {
     return NULL;
 }
 
-void pesquisarGabarito(LDEs &lGabarito, char letra, int letraNum, bool &acertou) {
+void pesquisarGabaritoVerde(LDEs &lGabarito, char letra, int letraNum) {
     Nos *aux = lGabarito.comeco;
-    int win = 0;
     while (aux != NULL) {
-        if (letra == aux->info) {
-            if (aux->id == letraNum) {    // mesma casa da letra
+        if (letra == aux->info && aux->id == letraNum) {
                 aux->condicao = verde;
-            } else {
-                aux->condicao = amarelo;     // casa diferente
+            } 
+            aux = aux->prox;
+        }
+}
+
+void pesquisarGabaritoAmarelo(LDEs &lGabarito, char letra, int letraNum) {
+    Nos *aux = lGabarito.comeco;
+    while (aux != NULL) {
+        if (letra == aux->info && !aux->id == letraNum) {
+                aux->condicao = amarelo;
             }
-        }
-        if (aux->condicao == verde) {
-            win++;
-            if (win == 4) acertou = true;
-        }
         aux = aux->prox;
     }
 }
 
+bool verificaVitoria(LDEs &lGabarito, bool &acertou){
+  Nos* aux = lGabarito.comeco;
+  int cond = 0;
+  while(aux!=NULL){
+    if(aux->condicao==verde){
+      cond++;
+    }
+    aux=aux->prox;
+  } if(cond==5) {
+    return true;
+    } else{
+  return false;
+  }
+}
+
 void criaListaGab(LDEs &lGabarito, No *temp) {
     string palavra = temp->info;
-    for (int i = 0; i < 5; i++) {   // Separa a palavra letra por letra e depois insere ela no arquivo
+    for (int i = 0; i < 5; i++) {  
         char letra = palavra[i];
         inserirFinalLDE(lGabarito, letra, i);
     }
@@ -192,8 +209,7 @@ bool removerPalavraLDE(LDE &lista, int linha) {
     return true;
 }
 
-// Função para construir a visualização da palavra com as letras acertadas
-void construirVisualizacao(LDEs &lGabarito, bool &acertou) {
+void construirVisualizacao(LDEs &lGabarito) {
     Nos *aux = lGabarito.comeco;
     while (aux != NULL) {
         if (aux->condicao == verde) {
@@ -239,10 +255,11 @@ void mostrarChute(LDEs &lGabarito, LDEs &lChute) {
     cout << endl;
 }
 
-void verificaJogo(LDEs lGabarito, string tentativaDePalavra, bool &acertou) {
+void verificaJogo(LDEs lGabarito, string tentativaDePalavra) {
     for (int i = 0; i < 5; i++) {
         char letra = tentativaDePalavra[i];
-        pesquisarGabarito(lGabarito, letra, i, acertou);
+        pesquisarGabaritoVerde(lGabarito, letra, i);
+        pesquisarGabaritoAmarelo(lGabarito, letra, i);
     }
 }
 
@@ -266,15 +283,12 @@ void jogar(LDE lista, LDEs &lGabarito, int subOpcao) {
     string palavra = temp->info;                   // Recebe palavra de acordo com id
     criaListaGab(lGabarito, temp);                  // Cria LDE gabarito com 5 posições com um CHAR em cada
 
-    LDEs lChute;  // Lista para armazenar a tentativa do jogador
-    limpaLDEs(lChute);  // Inicializa a lista de chute
+    LDEs lChute;  
+    limpaLDEs(lChute);  
 
     while (acertou == false) {
-        // Mostra a palavra com as letras acertadas
         cout << "Adivinhe a palavra: ";
-        construirVisualizacao(lGabarito, acertou);
-
-        // Recebe a tentativa do jogador
+        construirVisualizacao(lGabarito);
         cout << "Insira uma letra ou tente adivinhar a palavra completa: ";
         cin >> tentativaDePalavra;
 
@@ -282,7 +296,7 @@ void jogar(LDE lista, LDEs &lGabarito, int subOpcao) {
         while (tentativaDePalavra.length() != 5) {
             system("cls");
             cout << "Erro. A palavra deve conter cinco letras!" << endl;
-            construirVisualizacao(lGabarito, acertou);
+            construirVisualizacao(lGabarito);
             cout << "Insira a palavra novamente: ";
             cin >> tentativaDePalavra;
         }
@@ -293,7 +307,7 @@ void jogar(LDE lista, LDEs &lGabarito, int subOpcao) {
         }
 
         // Verifica a tentativa do jogador
-        verificaJogo(lGabarito, tentativaDePalavra, acertou);
+        verificaJogo(lGabarito, tentativaDePalavra);
 
         // Mostra o chute do jogador
         cout << "Seu chute: ";
@@ -325,14 +339,14 @@ void jogar(LDE lista, LDEs &lGabarito, int subOpcao) {
                 break;
         }
 
-        if (acertou == true) {
+        if (verificaVitoria(lGabarito,acertou)==true) {
             system("cls");
             cout << "Parabéns, você venceu!" << endl;
             system("pause");
             limpaLDEs(lGabarito);  // Limpa a lista após acerto total
             limpaLDEs(lChute);  // Limpa a lista de chute
             return;
-        } else if (acertou == false && perdeu == true) {
+        } else if (verificaVitoria(lGabarito,acertou)==false && perdeu == true) {
             system("cls");
             cout << "Você perdeu, boa sorte na próxima!" << endl;
             system("pause");
