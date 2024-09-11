@@ -3,7 +3,7 @@
 #include <string>
 #include <time.h>
 #include <cstdlib>
-#include <unordered_set>  // cores
+#include <unordered_set>
 
 using namespace std;
 
@@ -146,7 +146,7 @@ void pesquisarGabaritoVerde(LDEs &lGabarito, char letra, int letraNum) {
     while (aux != NULL) {
         if (letra == aux->info && aux->id == letraNum) {
                 aux->condicao = verde;
-            } 
+            }
             aux = aux->prox;
         }
 }
@@ -178,7 +178,7 @@ bool verificaVitoria(LDEs &lGabarito, bool &acertou){
 
 void criaListaGab(LDEs &lGabarito, No *temp) {
     string palavra = temp->info;
-    for (int i = 0; i < 5; i++) {  
+    for (int i = 0; i < 5; i++) {
         char letra = palavra[i];
         inserirFinalLDE(lGabarito, letra, i);
     }
@@ -213,7 +213,7 @@ void construirVisualizacao(LDEs &lGabarito) {
     Nos *aux = lGabarito.comeco;
     while (aux != NULL) {
         if (aux->condicao == verde) {
-            cout << "\033[1;32m" << aux->info << "\033[0m";  // Verde
+            cout << "\033[1;32m" << aux->info << "\033[0m";
         } else {
             cout << '_';
         }
@@ -228,10 +228,10 @@ void mostrarChute(LDEs &lGabarito, LDEs &lChute) {
 
     while (auxChute != NULL && auxGabarito != NULL) {
         if (auxChute->info == auxGabarito->info) {
-            // Letra correta e na posição certa (verde)
-            cout << "\033[1;32m" << auxChute->info << "\033[0m";  // Verde
+
+            cout << "\033[1;32m" << auxChute->info << "\033[0m";
         } else {
-            // Verifica se a letra existe em outra posição na palavra (amarelo)
+            // Verifica se a letra existe em outra palavra
             Nos *auxTemp = lGabarito.comeco;
             bool letraExiste = false;
             while (auxTemp != NULL) {
@@ -246,7 +246,7 @@ void mostrarChute(LDEs &lGabarito, LDEs &lChute) {
                 cout << "\033[1;33m" << auxChute->info << "\033[0m";  // Amarelo
             } else {
                 // Letra não existe na palavra (cinza)
-                cout << "\033[1;30m" << auxChute->info << "\033[0m";  // Cinza
+                cout << "\033[1;30m" << auxChute->info << "\033[0m";
             }
         }
         auxChute = auxChute->prox;
@@ -283,8 +283,8 @@ void jogar(LDE lista, LDEs &lGabarito, int subOpcao) {
     string palavra = temp->info;                   // Recebe palavra de acordo com id
     criaListaGab(lGabarito, temp);                  // Cria LDE gabarito com 5 posições com um CHAR em cada
 
-    LDEs lChute;  
-    limpaLDEs(lChute);  
+    LDEs lChute;
+    limpaLDEs(lChute);
 
     while (acertou == false) {
         cout << "Adivinhe a palavra: ";
@@ -301,20 +301,16 @@ void jogar(LDE lista, LDEs &lGabarito, int subOpcao) {
             cin >> tentativaDePalavra;
         }
 
-        // Adiciona a tentativa na lista lChute
         for (int i = 0; i < 5; i++) {
             inserirFinalLDE(lChute, tentativaDePalavra[i], i);
         }
 
-        // Verifica a tentativa do jogador
         verificaJogo(lGabarito, tentativaDePalavra);
 
-        // Mostra o chute do jogador
         cout << "Seu chute: ";
         mostrarChute(lGabarito, lChute);
         limpaLDEs(lChute);
 
-        // Atualiza o número de tentativas e verifica se o jogador perdeu
         tentativas++;
         switch(subOpcao) {
             case 1:
@@ -343,15 +339,15 @@ void jogar(LDE lista, LDEs &lGabarito, int subOpcao) {
             system("cls");
             cout << "Parabéns, você venceu!" << endl;
             system("pause");
-            limpaLDEs(lGabarito);  // Limpa a lista após acerto total
-            limpaLDEs(lChute);  // Limpa a lista de chute
+            limpaLDEs(lGabarito);
+            limpaLDEs(lChute);
             return;
         } else if (verificaVitoria(lGabarito,acertou)==false && perdeu == true) {
             system("cls");
             cout << "Você perdeu, boa sorte na próxima!" << endl;
             system("pause");
-            limpaLDEs(lGabarito);  // Limpa a lista após perder total
-            limpaLDEs(lChute);  // Limpa a lista de chute
+            limpaLDEs(lGabarito);
+            limpaLDEs(lChute);
             return;
         }
     }
